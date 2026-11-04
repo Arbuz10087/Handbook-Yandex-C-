@@ -6,11 +6,10 @@ const int DAYS_WITHOUT_FEBRUARY = 337;
 class Date {
     private:
     
-    int day=1;
-    int month=1;
-    int year=1970;
+    int totaldays;
 
-     int DaysInFebruary (int y) const {
+
+        int DaysInFebruary (int y) const {
       if ((!(y%4) && y%100) || !(y%400)) {
           return 29;
       } else {
@@ -32,7 +31,7 @@ class Date {
         }
     }
 
-    int TotalDays() const {
+    int TotalDays(int day, int month, int year) const {
         int days=0;
         for (int i = 1970; i< year; ++i) {
             days += DaysInYear(i);
@@ -44,10 +43,10 @@ class Date {
         return days;
     }
 
-    bool IsCorrectDate() const {
-        return GetMonth()>=1 && GetMonth() <= 12 && GetDay() <= DaysInMonth(month, year) && GetDay() >0;
+    bool IsCorrectDate(int day, int month, int year) const {
+        return month>=1 && month <= 12 && day <= DaysInMonth(month, year) && day >0;
     }
-    
+
 
         Date MakeDate(int days) const {
          int day_n = 1;
@@ -65,46 +64,78 @@ class Date {
       return Date(day_n, month_n, year_n);
     }
 
+
     
     public:
- 
+
     Date (int d, int m, int y):
-          day(d),
-          month(m),
-          year(y) 
+         totaldays(TotalDays(d, m, y))
           {
-              if (!IsCorrectDate()) {
-                  day = 1;
-                  month = 1;
-                  year = 1970;
+              if (!IsCorrectDate(d, m, y)) {
+               totaldays = 0;
               }
           }
 
     int GetDay() const {
+        int days = totaldays;
+        int day = 1;
+         int month = 1;
+         int year = 1970;
+         while (days> DaysInYear(year)) {
+             days-=DaysInYear(year);
+             ++year;
+         }
+         while (days> DaysInMonth(month, year)) {
+             days-=DaysInMonth(month, year);
+             ++month;
+         }
+         day+=days-1;
         return day;
     }
 
     int GetMonth() const {
+        int days = totaldays;
+        int month = 1;
+         int year = 1970;
+         while (days> DaysInYear(year)) {
+             days-=DaysInYear(year);
+             ++year;
+         }
+         while (days> DaysInMonth(month, year)) {
+             days-=DaysInMonth(month, year);
+             ++month;
+         }
         return month;
     }
 
 
     int GetYear() const {
+        int year=1970;
+        int days = totaldays;
+         while (days> DaysInYear(year)) {
+             days-=DaysInYear(year);
+             ++year;
+         }
+
         return year;
+    } 
+
+    int GetTotalDays() const {
+        return totaldays;
     }
      
-
-
     Date operator+ (int days) const {
-            return MakeDate(this->TotalDays()+days);
+            return MakeDate(totaldays+days);
         }
     
 
     Date operator- (int days) const {
-        return MakeDate(this->TotalDays()-days);
+        return MakeDate(totaldays-days);
     }
 
-    int operator- (const Date& other) const {
-      return TotalDays() - other.TotalDays();
-    }
+ 
 };
+
+   int operator- (const Date& lhs, const Date& rhs)  {
+      return lhs.GetTotalDays() - rhs.GetTotalDays();
+    }
